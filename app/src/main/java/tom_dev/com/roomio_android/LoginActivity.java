@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -45,10 +46,31 @@ public class LoginActivity extends AppCompatActivity {
     private final int GOOGLE_SIGN_IN = 2;
     private String TAG = "LoginActivity";
 
+    private  Utility util;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        util = new Utility(this);
+
+        // google/firebase setup
+        auth = FirebaseAuth.getInstance();
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Toast.makeText(LoginActivity.this, "Connection Failed", Toast.LENGTH_SHORT);
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
 
         // setup buttons
         btn_google = (SignInButton)this.findViewById(R.id.signInButton);
@@ -106,25 +128,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         // setup edit text fields
-        et_email = (EditText)this.findViewById(R.id.et_password);
-        et_password = (EditText)this.findViewById(R.id.et_email);
-
-        // google/firebase setup
-        auth = FirebaseAuth.getInstance();
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Toast.makeText(LoginActivity.this, "Connection Failed", Toast.LENGTH_SHORT);
-                    }
-                })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+        et_email = (EditText)this.findViewById(R.id.et_email);
+        et_password = (EditText)this.findViewById(R.id.et_password);
     }
 
     private void googleSignIn() {

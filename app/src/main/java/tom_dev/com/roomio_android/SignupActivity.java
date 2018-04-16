@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -28,21 +29,21 @@ public class SignupActivity extends AppCompatActivity {
     private EditText et_password;
 
     // Authentication
-    private GoogleApiClient googleApiClient;
     private FirebaseAuth auth;
-    private FirebaseAuth.AuthStateListener authStateListener;
 
-    private final int GOOGLE_SIGN_IN = 2;
-    private String TAG = "SignupActivity";
+    private Utility util;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
+        auth = FirebaseAuth.getInstance();
+        util = new Utility(this);
+
         // setup edit text fields
-        et_email = (EditText)this.findViewById(R.id.et_password);
-        et_password = (EditText)this.findViewById(R.id.et_email);
+        et_email = (EditText)this.findViewById(R.id.et_email);
+        et_password = (EditText)this.findViewById(R.id.et_password);
 
         // setup buttons
         btn_login = (Button)this.findViewById(R.id.btn_login);
@@ -60,18 +61,32 @@ public class SignupActivity extends AppCompatActivity {
                 String email = et_email.getText().toString().trim();
                 String password = et_password.getText().toString().trim();
 
+                int error = -1;
+
                 if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
-                    return;
+                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_LONG).show();
+                    error = 0;
+                }
+                else if (TextUtils.isEmpty(password)) {
+                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_LONG).show();
+                    error = 1;
+                }
+                else if (password.length() < 6) {
+                    Toast.makeText(getApplicationContext(), "Password too short, enter minimum 6 characters!", Toast.LENGTH_LONG).show();
+                    error = 1;
                 }
 
-                if (TextUtils.isEmpty(password)) {
-                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                if (error >= 0) {
+                    et_email.setText("");
+                    et_password.setText("");
 
-                if (password.length() < 6) {
-                    Toast.makeText(getApplicationContext(), "Password too short, enter minimum 6 characters!", Toast.LENGTH_SHORT).show();
+                    if (error == 0) {
+                        util.hideKeyboard(et_email);
+                    }
+                    else {
+                        util.hideKeyboard(et_password);
+                    }
+
                     return;
                 }
 
@@ -81,9 +96,6 @@ public class SignupActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 Toast.makeText(SignupActivity.this, "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
                                 if (!task.isSuccessful()) {
                                     Toast.makeText(SignupActivity.this, "Authentication failed." + task.getException(),
                                             Toast.LENGTH_SHORT).show();
@@ -93,7 +105,6 @@ public class SignupActivity extends AppCompatActivity {
                                 }
                             }
                         });
-
             }
         });
     }
