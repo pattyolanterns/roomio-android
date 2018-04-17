@@ -3,4 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <!--Balance Colors-->
+    <color name="BalanceGreen">#099A37</color>
+    <color name="BalanceRed">#FF363E</color>
 </resources>

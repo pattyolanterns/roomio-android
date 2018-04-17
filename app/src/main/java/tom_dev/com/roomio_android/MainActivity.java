@@ -5,15 +5,19 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
+import java.util.ArrayList;
+import android.support.v4.app.FragmentTransaction;
 
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private DrawerLayout drawer;
+    private RecyclerView recyclerView;
+    private MateAdapter mateAdapter;
 
     private Utility util;
 
@@ -35,6 +39,18 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+
+        // recycler view in nav drawer
+        recyclerView = (RecyclerView)findViewById(R.id.drawerRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        ArrayList<Mate> mates = new ArrayList<Mate>();
+        mateAdapter = new MateAdapter(this, mates);
+        recyclerView.setAdapter(mateAdapter);
+
+        // setup initial home fragment
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        HomeFragment fragment = new HomeFragment();
+        transaction.replace(R.id.fragment_container, fragment).commit();
     }
 
     @Override
